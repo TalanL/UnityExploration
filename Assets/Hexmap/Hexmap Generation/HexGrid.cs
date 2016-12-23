@@ -82,13 +82,16 @@ public class HexGrid : MonoBehaviour {
         label.text = cell.coordinates.ToSTringOnSeparateLines();
     }
 
-    public void ColorCell( Vector3 position, Color color)
+    public HexCell GetCell(Vector3 position)
     {
         position = transform.InverseTransformPoint(position);
         HexCoordinates coordinates = HexCoordinates.FromPosition(position);
         int index = coordinates.x + coordinates.z * width + coordinates.z / 2;
-        HexCell cell = cells[index];
-        cell.color = color;
+        return cells[index];
+    }
+
+    public void Refresh()
+    {
         hexMesh.Triangulate(cells);
     }
 }

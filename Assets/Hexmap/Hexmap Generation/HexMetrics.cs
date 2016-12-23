@@ -14,6 +14,8 @@ public static class HexMetrics {
 
     public const float blendfactor = 1f - solidFactor;
 
+    public const float elevationStep = 5f;
+
     //Not a fan of this static loop in corners. 
     private static Vector3[] corners =
     {
