@@ -80,6 +80,8 @@ public class HexGrid : MonoBehaviour {
         label.rectTransform.SetParent(gridCanvas.transform, false);
         label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
         label.text = cell.coordinates.ToSTringOnSeparateLines();
+        cell.uiRect = label.rectTransform;
+       
     }
 
     public HexCell GetCell(Vector3 position)
@@ -87,6 +89,7 @@ public class HexGrid : MonoBehaviour {
         position = transform.InverseTransformPoint(position);
         HexCoordinates coordinates = HexCoordinates.FromPosition(position);
         int index = coordinates.x + coordinates.z * width + coordinates.z / 2;
+        
         return cells[index];
     }
 

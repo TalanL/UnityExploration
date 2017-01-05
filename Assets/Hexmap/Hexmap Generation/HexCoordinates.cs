@@ -9,7 +9,7 @@ public struct HexCoordinates {
     public int x { get { return _x; } private set { } }
     public int z { get { return _z; } private set { } }
     public int y { get { return -x - z; } }
-
+    
 
     public HexCoordinates(int x, int z)
     {
