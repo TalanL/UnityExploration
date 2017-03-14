@@ -7,6 +7,9 @@ public class HexMapEditor : MonoBehaviour {
     public HexGrid hexGrid;
     public Color activecolor;
     public int activeElevation;
+    private bool applyColor;
+    private bool applyElevation = true;
+    private int brushSize;
 
     void Awake()
     {
@@ -32,24 +35,74 @@ public class HexMapEditor : MonoBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            EditCell(hexGrid.GetCell(hit.point));
+            EditCells(hexGrid.GetCell(hit.point));
         }
     }
 
+    private void EditCells(HexCell center)
+    {
+        int centerX = center.coordinates.x;
+        int centerZ = center.coordinates.z;
+
+        for(int r = 0, z = centerZ - brushSize; z <= centerZ; z++, r++)
+        {
+            for(int x = centerX - r; x <= centerX + brushSize; x++)
+            {
+                EditCell(hexGrid.GetCell(new HexCoordinates(x, z)));
+            }
+        }
+
+        for (int r = 0, z = centerZ + brushSize; z > centerZ; z--, r++)
+        {
+            for (int x = centerX - brushSize; x <= centerX + r; x++)
+            {
+                EditCell(hexGrid.GetCell(new HexCoordinates(x, z)));
+            }
+        }
+    }
+
+
     private void EditCell(HexCell cell)
     {
-        cell.color = activecolor;
-        cell.Elevation = activeElevation;
-        hexGrid.Refresh();
+        if (cell)
+        {
+            if (applyColor)
+            {
+                cell.Color = activecolor;
+            }
+            if (applyElevation)
+            {
+                cell.Elevation = activeElevation;
+            }
+        }
     }
 
     public void SelectColor(int index)
     {
-        activecolor = colors[index];
+        applyColor = index >= 0;
+        if (applyColor)
+        {
+            activecolor = colors[index];
+        }
     }
 
     public void SelectElevation (float elevation)
     {
-        activeElevation = (int)elevation;
+            activeElevation = (int)elevation;
+    }
+
+    public void SetApplyElevation(bool toggle)
+    {
+        applyElevation = toggle;
+    }
+
+    public void SetBrushSize(float size)
+    {
+        brushSize = (int)size;
+    }
+
+    public void ShowUI(bool visable)
+    {
+        hexGrid.ShowUI(visable);
     }
 }
