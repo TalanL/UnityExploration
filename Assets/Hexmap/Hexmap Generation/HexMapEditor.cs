@@ -2,6 +2,11 @@
 using UnityEngine.EventSystems;
 using System.Collections;
 
+enum OptionalToggle
+{
+    Ignore, Yes, No
+}
+
 public class HexMapEditor : MonoBehaviour {
     public Color[] colors;
     public HexGrid hexGrid;
@@ -10,6 +15,10 @@ public class HexMapEditor : MonoBehaviour {
     private bool applyColor;
     private bool applyElevation = true;
     private int brushSize;
+    private OptionalToggle riverMode;
+    private bool isDrag;
+    private HexDirection dragDirection;
+    private HexCell previousCell;
 
     void Awake()
     {
@@ -27,6 +36,10 @@ public class HexMapEditor : MonoBehaviour {
         {
             HandleInput();
         }
+        else
+        {
+            previousCell = null;
+        }
     }
 
     private void HandleInput()
@@ -35,7 +48,19 @@ public class HexMapEditor : MonoBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            EditCells(hexGrid.GetCell(hit.point));
+            HexCell currentCell = hexGrid.GetCell(hit.point);
+            if(previousCell && previousCell != currentCell)
+            {
+                ValidateDrag(currentCell);
+            } else
+            {
+                isDrag = false;
+            }
+            EditCells(currentCell);
+            previousCell = currentCell;
+        } else
+        {
+            previousCell = null;
         }
     }
 
@@ -74,7 +99,31 @@ public class HexMapEditor : MonoBehaviour {
             {
                 cell.Elevation = activeElevation;
             }
+            if (riverMode == OptionalToggle.No)
+            {
+                cell.RemoveRiver();
+            } else if(isDrag && riverMode == OptionalToggle.Yes)
+            {
+                HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
+                if (otherCell)
+                {
+                    otherCell.SetOutgoingRiver(dragDirection);
+                }
+            }
         }
+    }
+
+    private void ValidateDrag (HexCell currentCell)
+    {
+        for(dragDirection = HexDirection.NE; dragDirection<= HexDirection.NW; dragDirection++)
+        {
+            if(previousCell.GetNeighbor(dragDirection) == currentCell)
+            {
+                isDrag = true;
+                return;
+            }
+        }
+        isDrag = false;
     }
 
     public void SelectColor(int index)
@@ -104,5 +153,10 @@ public class HexMapEditor : MonoBehaviour {
     public void ShowUI(bool visable)
     {
         hexGrid.ShowUI(visable);
+    }
+
+    public void SetRiverMove (int mode)
+    {
+        riverMode = (OptionalToggle)mode;
     }
 }
